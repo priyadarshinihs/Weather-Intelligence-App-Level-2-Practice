@@ -1,0 +1,6 @@
+{
+  "name": "Weather Intelligent App",
+  "description": "An intelligent weather app that fetches current weather, 7-day forecast, and provides simple planning recommendations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
