@@ -117,7 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     data.results.forEach(city => {
                         const div = document.createElement('div');
                         div.className = 'px-4 py-3 hover:bg-white/10 cursor-pointer text-white border-b border-white/5 last:border-0 transition-colors';
-                        div.textContent = `${city.name}${city.country ? ', ' + city.country : ''}`;
+                        const locationParts = [city.name, city.admin1, city.country].filter(Boolean);
+                        div.textContent = locationParts.join(", ");
                         div.addEventListener('click', () => {
                             searchInput.value = city.name;
                             suggestionsBox.classList.add('hidden');

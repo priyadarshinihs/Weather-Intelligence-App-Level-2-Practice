@@ -134,8 +134,10 @@ fun WeatherAppScreen(viewModel: WeatherViewModel = viewModel()) {
                             .background(Color(0xFF3B2F5D))
                     ) {
                         suggestions.forEach { city ->
+                            val locationParts = listOfNotNull(city.name, city.admin1, city.country).filter { it.isNotBlank() }
+                            val locationText = locationParts.joinToString(", ")
                             DropdownMenuItem(
-                                text = { Text("${city.name}, ${city.country ?: ""}", color = Color.White) },
+                                text = { Text(locationText, color = Color.White) },
                                 onClick = {
                                     searchQuery = city.name
                                     isDropdownExpanded = false
