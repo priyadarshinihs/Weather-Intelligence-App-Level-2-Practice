@@ -2,7 +2,7 @@ package com.example.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.network.GeocodingResult
+import com.example.network.GeocodingResponse
 import com.example.network.WeatherRepository
 import com.example.network.WeatherResult
 import kotlinx.coroutines.Job
@@ -22,8 +22,8 @@ class WeatherViewModel : ViewModel() {
     private val _currentTime = MutableStateFlow("")
     val currentTime: StateFlow<String> = _currentTime
 
-    private val _suggestions = MutableStateFlow<List<GeocodingResult>>(emptyList())
-    val suggestions: StateFlow<List<GeocodingResult>> = _suggestions
+    private val _suggestions = MutableStateFlow<List<GeocodingResponse>>(emptyList())
+    val suggestions: StateFlow<List<GeocodingResponse>> = _suggestions
 
     private var searchJob: Job? = null
 

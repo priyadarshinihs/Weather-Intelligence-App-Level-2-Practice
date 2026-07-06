@@ -11,13 +11,13 @@ class WeatherRepository {
     suspend fun getWeatherData(city: String): WeatherResult {
         return withContext(Dispatchers.IO) {
             try {
-                val geoResponse = weatherApi.searchCity(city)
-                val results = geoResponse.results
-                if (results.isNullOrEmpty()) {
+                val results = weatherApi.searchCity(name = city, limit = 1)
+                if (results.isEmpty()) {
                     return@withContext WeatherResult.Error("City not found")
                 }
                 
                 val location = results[0]
+                val cityName = location.address?.cityName ?: location.name
                 val weather = weatherApi.getWeather(
                     latitude = location.latitude,
                     longitude = location.longitude
@@ -27,7 +27,7 @@ class WeatherRepository {
                 val currentTemp = weather.current?.temperature ?: 0.0
                 val weatherDesc = getWeatherDescription(weather.current?.weatherCode ?: 0)
                 
-                val prompt = "The current weather in ${location.name} is $currentTemp°C and $weatherDesc. Keep it under 2 sentences. Give a simple, practical planning recommendation for the day (e.g. 'Take an umbrella' or 'Great day for a walk')."
+                val prompt = "The current weather in $cityName is $currentTemp°C and $weatherDesc. Keep it under 2 sentences. Give a simple, practical planning recommendation for the day (e.g. 'Take an umbrella' or 'Great day for a walk')."
                 
                 val recommendation = try {
                     val req = GenerateContentRequest(listOf(Content(listOf(Part(prompt)))))
@@ -37,18 +37,17 @@ class WeatherRepository {
                     "Enjoy your day! (AI suggestion unavailable)"
                 }
 
-                WeatherResult.Success(location.name, weather, recommendation)
+                WeatherResult.Success(cityName, weather, recommendation)
             } catch (e: Exception) {
                 WeatherResult.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    suspend fun getCitySuggestions(query: String): List<GeocodingResult> {
+    suspend fun getCitySuggestions(query: String): List<GeocodingResponse> {
         return withContext(Dispatchers.IO) {
             try {
-                val geoResponse = weatherApi.searchCity(query, count = 5)
-                geoResponse.results ?: emptyList()
+                weatherApi.searchCity(name = query, limit = 5)
             } catch (e: Exception) {
                 emptyList()
             }

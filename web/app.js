@@ -109,20 +109,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         debounceTimer = setTimeout(async () => {
             try {
-                const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`, {
+                    headers: { 'Accept-Language': 'en-US,en;q=0.9' }
+                });
                 const data = await res.json();
                 
-                if (data.results && data.results.length > 0) {
+                if (data && data.length > 0) {
                     suggestionsBox.innerHTML = '';
-                    data.results.forEach(city => {
+                    data.forEach(city => {
                         const div = document.createElement('div');
                         div.className = 'px-4 py-3 hover:bg-white/10 cursor-pointer text-white border-b border-white/5 last:border-0 transition-colors';
-                        const locationParts = [city.name, city.admin1, city.country].filter(Boolean);
+                        
+                        // Extract address parts
+                        const address = city.address || {};
+                        const cityName = address.city || address.town || address.village || address.name || city.name;
+                        const stateName = address.state || address.region;
+                        const countryName = address.country;
+                        
+                        const locationParts = [cityName, stateName, countryName].filter(Boolean);
                         div.textContent = locationParts.join(", ");
+                        
                         div.addEventListener('click', () => {
-                            searchInput.value = city.name;
+                            searchInput.value = cityName;
                             suggestionsBox.classList.add('hidden');
-                            fetchWeather(city.name, city.latitude, city.longitude);
+                            fetchWeather(cityName, city.lat, city.lon);
                         });
                         suggestionsBox.appendChild(div);
                     });
@@ -158,11 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchCityData(query) {
         showLoading();
         try {
-            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1`);
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=1`, {
+                headers: { 'Accept-Language': 'en-US,en;q=0.9' }
+            });
             const data = await res.json();
-            if (data.results && data.results.length > 0) {
-                const city = data.results[0];
-                fetchWeather(city.name, city.latitude, city.longitude);
+            if (data && data.length > 0) {
+                const city = data[0];
+                const address = city.address || {};
+                const cityName = address.city || address.town || address.village || address.name || city.name;
+                fetchWeather(cityName, city.lat, city.lon);
             } else {
                 showError("City not found");
             }
