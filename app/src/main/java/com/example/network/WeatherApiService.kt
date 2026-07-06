@@ -4,14 +4,11 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface WeatherApiService {
-    @GET("https://nominatim.openstreetmap.org/search")
+    @GET("https://geocoding-api.open-meteo.com/v1/search")
     suspend fun searchCity(
-        @Query("q") name: String,
-        @Query("format") format: String = "json",
-        @Query("addressdetails") addressDetails: Int = 1,
-        @Query("limit") limit: Int = 5,
-        @Query("accept-language") language: String = "en"
-    ): List<GeocodingResponse>
+        @Query("name") name: String,
+        @Query("count") count: Int = 1
+    ): GeocodingResponse
 
     @GET("https://api.open-meteo.com/v1/forecast")
     suspend fun getWeather(

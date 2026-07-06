@@ -11,13 +11,14 @@ class WeatherRepository {
     suspend fun getWeatherData(city: String): WeatherResult {
         return withContext(Dispatchers.IO) {
             try {
-                val results = weatherApi.searchCity(name = city, limit = 1)
-                if (results.isEmpty()) {
+                val geoResponse = weatherApi.searchCity(name = city, count = 1)
+                val results = geoResponse.results
+                if (results.isNullOrEmpty()) {
                     return@withContext WeatherResult.Error("City not found")
                 }
                 
                 val location = results[0]
-                val cityName = location.address?.cityName ?: location.name
+                val cityName = location.name
                 val weather = weatherApi.getWeather(
                     latitude = location.latitude,
                     longitude = location.longitude
@@ -44,10 +45,11 @@ class WeatherRepository {
         }
     }
 
-    suspend fun getCitySuggestions(query: String): List<GeocodingResponse> {
+    suspend fun getCitySuggestions(query: String): List<GeocodingResult> {
         return withContext(Dispatchers.IO) {
             try {
-                weatherApi.searchCity(name = query, limit = 5)
+                val geoResponse = weatherApi.searchCity(name = query, count = 5)
+                geoResponse.results ?: emptyList()
             } catch (e: Exception) {
                 emptyList()
             }

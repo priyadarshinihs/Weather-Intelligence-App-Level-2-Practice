@@ -5,27 +5,17 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class GeocodingResponse(
-    @Json(name = "place_id") val placeId: Long,
-    @Json(name = "name") val name: String,
-    @Json(name = "display_name") val displayName: String,
-    @Json(name = "lat") val latStr: String,
-    @Json(name = "lon") val lonStr: String,
-    @Json(name = "address") val address: AddressDetails? = null
-) {
-    val latitude: Double get() = latStr.toDoubleOrNull() ?: 0.0
-    val longitude: Double get() = lonStr.toDoubleOrNull() ?: 0.0
-}
+    @Json(name = "results") val results: List<GeocodingResult>?
+)
 
 @JsonClass(generateAdapter = true)
-data class AddressDetails(
-    @Json(name = "city") val city: String? = null,
-    @Json(name = "town") val town: String? = null,
-    @Json(name = "village") val village: String? = null,
-    @Json(name = "state") val state: String? = null,
+data class GeocodingResult(
+    @Json(name = "name") val name: String,
+    @Json(name = "latitude") val latitude: Double,
+    @Json(name = "longitude") val longitude: Double,
+    @Json(name = "admin1") val admin1: String? = null,
     @Json(name = "country") val country: String? = null
-) {
-    val cityName: String? get() = city ?: town ?: village
-}
+)
 
 @JsonClass(generateAdapter = true)
 data class WeatherResponse(

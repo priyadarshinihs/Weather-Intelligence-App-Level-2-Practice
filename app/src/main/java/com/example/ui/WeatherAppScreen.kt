@@ -134,20 +134,15 @@ fun WeatherAppScreen(viewModel: WeatherViewModel = viewModel()) {
                             .background(Color(0xFF3B2F5D))
                     ) {
                         suggestions.forEach { city ->
-                            val address = city.address
-                            val cityName = address?.cityName ?: city.name
-                            val stateName = address?.state
-                            val countryName = address?.country
-                            
-                            val locationParts = listOfNotNull(cityName, stateName, countryName).filter { it.isNotBlank() }
+                            val locationParts = listOfNotNull(city.name, city.admin1, city.country).filter { it.isNotBlank() }
                             val locationText = locationParts.joinToString(", ")
                             DropdownMenuItem(
                                 text = { Text(locationText, color = Color.White) },
                                 onClick = {
-                                    searchQuery = cityName
+                                    searchQuery = city.name
                                     isDropdownExpanded = false
                                     viewModel.clearSuggestions()
-                                    viewModel.fetchWeather(cityName)
+                                    viewModel.fetchWeather(city.name)
                                 }
                             )
                         }
