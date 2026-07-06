@@ -52,10 +52,7 @@
             <!-- Recommendation Card -->
             <div class="bg-white/20 backdrop-blur-md rounded-2xl p-4 mb-6 flex items-center shadow-lg border border-white/10">
                 <span class="material-icons-round text-yellow-400 mr-3 text-2xl">lightbulb</span>
-                <p id="recommendation-text" class="text-sm text-white flex-1 leading-tight">Loading AI recommendation...</p>
-                <button id="btn-edit-key" class="ml-2 text-white/50 hover:text-white" title="Configure Gemini API Key">
-                    <span class="material-icons-round text-sm">settings</span>
-                </button>
+                <p id="recommendation-text" class="text-sm text-white flex-1 leading-tight">Loading recommendation...</p>
             </div>
 
             <!-- Bottom Sheet -->
@@ -85,20 +82,6 @@
         <div id="error-state" class="flex-1 flex items-center justify-center hidden">
             <div class="bg-white/10 backdrop-blur-md px-6 py-4 rounded-xl border border-white/10">
                 <p id="error-text" class="text-white text-lg text-center">City not found</p>
-            </div>
-        </div>
-
-        <!-- API Key Modal (for Gemini) -->
-        <div id="api-key-modal" class="absolute inset-0 bg-black/60 z-[100] flex items-center justify-center hidden backdrop-blur-sm">
-            <div class="bg-[#2C244B] p-6 rounded-2xl max-w-sm w-full mx-4 text-center border border-white/20 shadow-2xl">
-                <h2 class="text-xl font-bold mb-3">Gemini AI Recommendations</h2>
-                <p class="text-sm text-white/80 mb-5">To generate intelligent planning recommendations, please enter a Gemini API key. This is stored only in your local browser.</p>
-                <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-black/30 border border-white/20 rounded-lg p-3 text-white mb-5 focus:outline-none focus:border-white">
-                <div class="flex gap-3">
-                    <button id="btn-skip-key" class="flex-1 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors font-medium">Skip</button>
-                    <button id="btn-save-key" class="flex-1 py-2.5 rounded-lg bg-[#5A499C] hover:bg-[#6c58b5] transition-colors font-medium">Save Key</button>
-                </div>
-                <p class="text-xs text-white/50 mt-4"><a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline hover:text-white">Get an API key</a></p>
             </div>
         </div>
     </div>

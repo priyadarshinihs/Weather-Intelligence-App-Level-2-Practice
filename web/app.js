@@ -10,13 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorState = document.getElementById('error-state');
     const errorText = document.getElementById('error-text');
     
-    // API Key Modal
-    const apiKeyModal = document.getElementById('api-key-modal');
-    const apiKeyInput = document.getElementById('api-key-input');
-    const btnSaveKey = document.getElementById('btn-save-key');
-    const btnSkipKey = document.getElementById('btn-skip-key');
-    const btnEditKey = document.getElementById('btn-edit-key');
-    
     // Tabs
     const tabHourly = document.getElementById('tab-hourly');
     const tabWeekly = document.getElementById('tab-weekly');
@@ -32,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const recTextEl = document.getElementById('recommendation-text');
 
     // State
-    let geminiApiKey = localStorage.getItem('gemini_api_key');
     let debounceTimer;
     let currentCity = 'Montreal'; // Default city
 
@@ -43,36 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setInterval(updateClock, 1000);
     updateClock();
-
-    // Check API Key
-    if (!geminiApiKey && !sessionStorage.getItem('skip_api_key')) {
-        apiKeyModal.classList.remove('hidden');
-    }
-
-    btnSaveKey.addEventListener('click', () => {
-        const key = apiKeyInput.value.trim();
-        if (key) {
-            geminiApiKey = key;
-            localStorage.setItem('gemini_api_key', key);
-            apiKeyModal.classList.add('hidden');
-            if (weatherContent.classList.contains('hidden') === false) {
-                 fetchRecommendation(currentCity, currentTempEl.textContent, weatherDescEl.textContent);
-            }
-        }
-    });
-
-    btnSkipKey.addEventListener('click', () => {
-        sessionStorage.setItem('skip_api_key', 'true');
-        apiKeyModal.classList.add('hidden');
-        if (weatherContent.classList.contains('hidden') === false) {
-             fetchRecommendation(currentCity, currentTempEl.textContent, weatherDescEl.textContent);
-        }
-    });
-
-    btnEditKey.addEventListener('click', () => {
-        apiKeyInput.value = geminiApiKey || '';
-        apiKeyModal.classList.remove('hidden');
-    });
 
     // API Helpers
     function getWeatherCondition(code) {
@@ -259,43 +221,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchRecommendation(name, temp, desc) {
-        recTextEl.textContent = "Loading AI recommendation...";
+        let rec = "Enjoy your day!";
+        const lowerDesc = desc.toLowerCase();
         
-        if (!geminiApiKey) {
-            recTextEl.textContent = "Enjoy your day! (AI suggestion unavailable, configure key in settings)";
-            return;
+        if (lowerDesc.includes('rain') || lowerDesc.includes('drizzle') || lowerDesc.includes('showers')) {
+            rec = "Don't forget your umbrella today.";
+        } else if (lowerDesc.includes('snow')) {
+            rec = "Bundle up, it's snowy out there.";
+        } else if (lowerDesc.includes('thunderstorm')) {
+            rec = "Thunderstorms expected, stay indoors if possible.";
+        } else if (temp > 25) {
+            rec = "It's quite warm today, stay hydrated.";
+        } else if (temp < 10) {
+            rec = "It's a bit chilly, wear a warm jacket.";
+        } else if (lowerDesc.includes('clear') || lowerDesc.includes('sunny')) {
+            rec = "Great weather for a walk outdoors!";
+        } else if (lowerDesc.includes('cloudy')) {
+            rec = "A cloudy day, maybe a good time to read a book.";
         }
-
-        try {
-            const prompt = `The current weather in ${name} is ${temp}°C and ${desc}. Keep it under 2 sentences. Give a simple, practical planning recommendation for the day (e.g. 'Take an umbrella' or 'Great day for a walk').`;
-            
-            const reqBody = {
-                contents: [{ parts: [{ text: prompt }] }]
-            };
-
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reqBody)
-            });
-
-            const data = await res.json();
-            
-            if (data.candidates && data.candidates.length > 0) {
-                recTextEl.textContent = data.candidates[0].content.parts[0].text;
-            } else {
-                recTextEl.textContent = "Enjoy your day!";
-                if (data.error) {
-                     console.error(data.error);
-                     if (data.error.code === 400 || data.error.code === 403) {
-                         recTextEl.textContent = "Enjoy your day! (Invalid API Key)";
-                     }
-                }
-            }
-        } catch (err) {
-            console.error(err);
-            recTextEl.textContent = "Enjoy your day!";
-        }
+        
+        recTextEl.textContent = rec;
     }
 
     function formatHour(isoString) {
