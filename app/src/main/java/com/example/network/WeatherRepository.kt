@@ -1,12 +1,10 @@
 package com.example.network
 
-import com.example.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class WeatherRepository {
     private val weatherApi = RetrofitClient.apiService
-    private val geminiApi = GeminiRetrofitClient.apiService
 
     suspend fun getWeatherData(city: String): WeatherResult {
         return withContext(Dispatchers.IO) {
@@ -28,20 +26,26 @@ class WeatherRepository {
                 val currentTemp = weather.current?.temperature ?: 0.0
                 val weatherDesc = getWeatherDescription(weather.current?.weatherCode ?: 0)
                 
-                val prompt = "The current weather in $cityName is $currentTemp°C and $weatherDesc. Keep it under 2 sentences. Give a simple, practical planning recommendation for the day (e.g. 'Take an umbrella' or 'Great day for a walk')."
-                
-                val recommendation = try {
-                    val req = GenerateContentRequest(listOf(Content(listOf(Part(prompt)))))
-                    val res = geminiApi.generateContent(BuildConfig.GEMINI_API_KEY, req)
-                    res.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: "Enjoy your day!"
-                } catch (e: Exception) {
-                    "Enjoy your day! (AI suggestion unavailable)"
-                }
+                val recommendation = getLocalRecommendation(currentTemp, weatherDesc)
 
                 WeatherResult.Success(cityName, weather, recommendation)
             } catch (e: Exception) {
                 WeatherResult.Error(e.message ?: "Unknown error")
             }
+        }
+    }
+
+    private fun getLocalRecommendation(temp: Double, desc: String): String {
+        val lowerDesc = desc.lowercase()
+        return when {
+            lowerDesc.contains("rain") || lowerDesc.contains("drizzle") || lowerDesc.contains("showers") -> "Don't forget your umbrella today."
+            lowerDesc.contains("snow") -> "Bundle up, it's snowy out there."
+            lowerDesc.contains("thunderstorm") -> "Thunderstorms expected, stay indoors if possible."
+            temp > 25 -> "It's quite warm today, stay hydrated."
+            temp < 10 -> "It's a bit chilly, wear a warm jacket."
+            lowerDesc.contains("clear") || lowerDesc.contains("sunny") -> "Great weather for a walk outdoors!"
+            lowerDesc.contains("cloudy") || lowerDesc.contains("overcast") -> "A cloudy day, maybe a good time to read a book."
+            else -> "Enjoy your day!"
         }
     }
 
